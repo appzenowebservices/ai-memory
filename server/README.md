@@ -12,12 +12,14 @@ Mem0 ships a self-hosted FastAPI server plus a local dashboard. It is secure by 
 
 ### Prerequisites
 
-Copy the example env file and set a Postgres password (required):
+Copy the example env file and set your Supabase + OpenAI values (no local
+Postgres — the stack uses your cloud Supabase DB for app tables + vectors):
 
 ```bash
 cd server
 cp .env.example .env
-# Edit .env — at minimum set POSTGRES_PASSWORD and OPENAI_API_KEY
+# Edit .env — at minimum set DATABASE_URL, SUPABASE_CONNECTION_STRING, and OPENAI_API_KEY
+# Use the Supabase DIRECT connection on 5432 with ?sslmode=require (not the 6543 pooler).
 ```
 
 ### Agent-first
@@ -153,7 +155,8 @@ replaces it with the official `pgvector/pgvector:pg17` image (PostgreSQL 17, pgv
 
 ### Fresh installs (no existing data)
 
-No migration needed. Copy `.env.example` to `.env`, set `POSTGRES_PASSWORD`, and run:
+No migration needed. Copy `.env.example` to `.env`, set `DATABASE_URL`,
+`SUPABASE_CONNECTION_STRING`, and `OPENAI_API_KEY`, and run:
 
 ```bash
 cd server

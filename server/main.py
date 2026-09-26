@@ -111,30 +111,73 @@ POSTGRES_DB = os.environ.get("POSTGRES_DB", "postgres")
 POSTGRES_USER = os.environ.get("POSTGRES_USER", "postgres")
 POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "postgres")
 POSTGRES_COLLECTION_NAME = os.environ.get("POSTGRES_COLLECTION_NAME", "memories")
+POSTGRES_SSLMODE = os.environ.get("POSTGRES_SSLMODE")
+
+# Cloud-first: single Supabase Postgres for app tables + vectors.
+# Set SUPABASE_CONNECTION_STRING (or VECTOR_STORE_CONNECTION_STRING) to the
+# Supabase direct connection string on port 5432 with ?sslmode=require.
+# The transaction pooler on 6543 breaks collection/index DDL, so use direct.
+SUPABASE_CONNECTION_STRING = os.environ.get("SUPABASE_CONNECTION_STRING") or os.environ.get(
+    "VECTOR_STORE_CONNECTION_STRING"
+)
+EMBEDDING_MODEL_DIMS = int(os.environ.get("MEM0_EMBEDDING_MODEL_DIMS", "1536"))
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+# OpenAI-compatible base URL for custom LLM gateways (e.g. opencode Go serving
+# muse-spark). mem0's openai provider reads openai_base_url / OPENAI_BASE_URL.
+OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL")
 HISTORY_DB_PATH = os.environ.get("HISTORY_DB_PATH", "/app/history/history.db")
 DEFAULT_LLM_MODEL = os.environ.get("MEM0_DEFAULT_LLM_MODEL", "gpt-5-mini")
 DEFAULT_EMBEDDER_MODEL = os.environ.get("MEM0_DEFAULT_EMBEDDER_MODEL", "text-embedding-3-small")
 
+
+def _build_vector_store_config() -> Dict[str, Any]:
+    if SUPABASE_CONNECTION_STRING:
+        connection_string = SUPABASE_CONNECTION_STRING
+        if "sslmode" not in connection_string and "supabase.co" in connection_string:
+            sep = "&" if "?" in connection_string else "?"
+            connection_string += f"{sep}sslmode=require"
+        return {
+            "provider": "pgvector",
+            "config": {
+                "connection_string": connection_string,
+                "collection_name": POSTGRES_COLLECTION_NAME,
+                "embedding_model_dims": EMBEDDING_MODEL_DIMS,
+                "sslmode": POSTGRES_SSLMODE or "require",
+            },
+        }
+    config: Dict[str, Any] = {
+        "host": POSTGRES_HOST,
+        "port": int(POSTGRES_PORT),
+        "dbname": POSTGRES_DB,
+        "user": POSTGRES_USER,
+        "password": POSTGRES_PASSWORD,
+        "collection_name": POSTGRES_COLLECTION_NAME,
+    }
+    if POSTGRES_SSLMODE:
+        config["sslmode"] = POSTGRES_SSLMODE
+    return {"provider": "pgvector", "config": config}
+
+
+def _build_llm_config() -> Dict[str, Any]:
+    config: Dict[str, Any] = {"api_key": OPENAI_API_KEY, "temperature": 0.2, "model": DEFAULT_LLM_MODEL}
+    if OPENAI_BASE_URL:
+        config["openai_base_url"] = OPENAI_BASE_URL
+    return {"provider": "openai", "config": config}
+
+
+def _build_embedder_config() -> Dict[str, Any]:
+    config: Dict[str, Any] = {"api_key": OPENAI_API_KEY, "model": DEFAULT_EMBEDDER_MODEL}
+    if OPENAI_BASE_URL:
+        config["openai_base_url"] = OPENAI_BASE_URL
+    return {"provider": "openai", "config": config}
+
+
 DEFAULT_CONFIG = {
     "version": "v1.1",
-    "vector_store": {
-        "provider": "pgvector",
-        "config": {
-            "host": POSTGRES_HOST,
-            "port": int(POSTGRES_PORT),
-            "dbname": POSTGRES_DB,
-            "user": POSTGRES_USER,
-            "password": POSTGRES_PASSWORD,
-            "collection_name": POSTGRES_COLLECTION_NAME,
-        },
-    },
-    "llm": {
-        "provider": "openai",
-        "config": {"api_key": OPENAI_API_KEY, "temperature": 0.2, "model": DEFAULT_LLM_MODEL},
-    },
-    "embedder": {"provider": "openai", "config": {"api_key": OPENAI_API_KEY, "model": DEFAULT_EMBEDDER_MODEL}},
+    "vector_store": _build_vector_store_config(),
+    "llm": _build_llm_config(),
+    "embedder": _build_embedder_config(),
     "history_db_path": HISTORY_DB_PATH,
 }
 

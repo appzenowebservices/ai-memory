@@ -45,7 +45,7 @@ bootstrap: up wait-api wait-dashboard seed
 health:
 	@echo "API:       $$(curl -s -o /dev/null -w '%{http_code}' "$(API_URL)/docs")"
 	@echo "Dashboard: $$(curl -s -o /dev/null -w '%{http_code}' "$(DASHBOARD_URL)/api/health")"
-	@echo "Postgres:  $$(docker compose exec -T postgres pg_isready -q && echo 'ok' || echo 'down')"
+	@echo "DB:        cloud Supabase via DATABASE_URL (no local postgres container)"
 
 reset-admin-password:
 	@test -n "$(EMAIL)" || (echo "usage: make reset-admin-password EMAIL=<email> PASSWORD=<password>" && exit 2)
@@ -56,7 +56,7 @@ prune-logs:
 	@docker compose exec -T -e REQUEST_LOG_RETENTION_DAYS="$(REQUEST_LOG_RETENTION_DAYS)" -e PYTHONPATH=/app mem0 python scripts/prune_request_logs.py
 
 build:
-	docker build -t mem0-api-server .
+	docker build -t ai-memory .
 
 run_local:
-	docker run -p 8000:8000 -v $(shell pwd):/app mem0-api-server --env-file .env
+	docker run -p 8000:8000 --env-file .env ai-memory

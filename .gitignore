@@ -7,6 +7,13 @@ __pycache__/
 # Self-hosted server local runtime state
 server/history/
 server/.env
+.env.*
+!.env.example
+!server/.env.example
+
+# Local database dumps (see server/README migration docs)
+mem0_backup.sql
+*.dump
 
 # C extensions
 *.so
