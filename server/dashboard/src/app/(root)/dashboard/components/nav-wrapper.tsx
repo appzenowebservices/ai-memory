@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { RootState } from "@/store/store";
 import { toggleSidebar } from "@/store/reducers/layoutReducer";
 import { useAuth } from "@/hooks/use-auth";
+import { DbStatus } from "@/components/self-hosted/db-status";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,7 +36,7 @@ export default function NavWrapper() {
   );
   const { user, logout } = useAuth();
 
-  const instanceName = process.env.NEXT_PUBLIC_INSTANCE_NAME || "Mem0";
+  const instanceName = process.env.NEXT_PUBLIC_INSTANCE_NAME || "AI Memory";
 
   const handleToggle = useCallback(() => {
     dispatch(toggleSidebar());
@@ -154,6 +155,7 @@ export default function NavWrapper() {
         </div>
 
         <div className="flex items-center gap-3">
+          <DbStatus />
           <Tooltip>
             <TooltipTrigger asChild>
               <a

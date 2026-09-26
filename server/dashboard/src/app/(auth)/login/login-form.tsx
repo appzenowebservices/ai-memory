@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { getErrorMessage } from "@/lib/error-message";
 import { isValidEmail } from "@/lib/validators";
+import { DbStatus } from "@/components/self-hosted/db-status";
 
 const RESET_COMMAND =
   "make reset-admin-password EMAIL=<your-email> PASSWORD=<new-password>";
@@ -78,14 +79,14 @@ export default function LoginForm() {
                     ? "/images/logos/logo-light.png"
                     : "/images/logos/logo-dark.png"
                 }
-                alt="Mem0"
+                alt="AI Memory"
                 width={41}
                 height={41}
               />
             )}
           </div>
           <h1 className="text-2xl font-semibold text-onSurface-default-primary text-center mb-6 font-fustat">
-            Sign in to Mem0
+            Sign in to AI Memory
           </h1>
           <div className="flex flex-col gap-4 border p-8 border-memBorder-primary rounded-xl">
             {error && (
@@ -169,61 +170,25 @@ export default function LoginForm() {
               </DialogContent>
             </Dialog>
           </div>
+          <div className="mt-4 flex justify-center">
+            <DbStatus />
+          </div>
         </div>
       </div>
 
       <div className="relative hidden h-screen flex-1 items-center justify-center overflow-hidden bg-gradient-to-b from-[#31275A] to-[#5C49A3] px-10 lg:flex">
         <div className="pointer-events-none absolute inset-0 bg-[url('/images/dither.svg')] bg-bottom bg-no-repeat bg-contain" />
-        <div className="relative z-10 flex w-full max-w-[564px] flex-col items-center gap-20 text-center text-white">
+        <div className="relative z-10 flex w-full max-w-[564px] flex-col items-center gap-16 text-center text-white">
           <div className="w-full space-y-5">
-            <p className="typo-h3 text-white">
-              &quot;Mem0 allowed us to unlock true personalized tutoring for
-              every student, and it took us just a weekend to integrate.&quot;
+            <p className="typo-h3 text-white">App-Zeno AI Memory</p>
+            <p className="typo-body text-white/80">
+              Long-term memory for your AI agents and apps. Store what
+              matters, recall it when it counts.
             </p>
-            <div className="flex flex-col items-center gap-[7px]">
-              <div className="flex flex-col items-center gap-1">
-                <p className="typo-body-sm text-white">Michael Tong</p>
-                <p className="typo-body-xs text-white">CTO, RevisionDojo</p>
-              </div>
-              <Image
-                src="/images/micheal.png"
-                alt="Michael Tong"
-                width={32}
-                height={32}
-                className="size-8 rounded-full object-cover"
-              />
-            </div>
           </div>
           <div className="flex w-full flex-col items-center gap-3">
-            <p className="typo-body text-white">Trusted by 100k+ Developers</p>
-            <div className="flex items-center justify-center gap-8 text-white">
-              <div className="h-6 shrink-0">
-                <Image
-                  src="/images/logos/aws.svg"
-                  alt="AWS"
-                  width={41}
-                  height={24}
-                  className="size-full object-contain"
-                />
-              </div>
-              <div className="h-5 shrink-0">
-                <Image
-                  src="/images/logos/nvidia.svg"
-                  alt="NVIDIA"
-                  width={109}
-                  height={21}
-                  className="size-full object-contain"
-                />
-              </div>
-              <div className="h-[21px] shrink-0">
-                <Image
-                  src="/images/vercel.png"
-                  alt="Vercel"
-                  width={66}
-                  height={21}
-                  className="size-full object-contain"
-                />
-              </div>
+            <div className="rounded-full bg-white/10 px-4 py-2 backdrop-blur">
+              <DbStatus tone="light" />
             </div>
           </div>
         </div>

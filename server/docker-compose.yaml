@@ -42,7 +42,7 @@ services:
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8888}
       - API_INTERNAL_URL=http://mem0:8000
-      - NEXT_PUBLIC_INSTANCE_NAME=Mem0
+      - NEXT_PUBLIC_INSTANCE_NAME=${NEXT_PUBLIC_INSTANCE_NAME:-AI Memory}
     depends_on:
       mem0:
         condition: service_started

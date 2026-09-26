@@ -36,7 +36,7 @@ from server_state import (
 )
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 
 from mem0.exceptions import ValidationError as Mem0ValidationError
 
@@ -360,6 +360,28 @@ async def log_requests(request: Request, call_next):
                 round((time.perf_counter() - start) * 1000, 2),
                 getattr(request.state, "auth_type", "none"),
             )
+
+
+@app.get("/api/health", summary="Service and database health")
+def api_health():
+    """Public health check: app database + vector store reachability.
+
+    No auth on purpose so load balancers and the login page can poll it."""
+    database = "connected"
+    try:
+        with SessionLocal() as session:
+            session.execute(text("SELECT 1"))
+    except Exception as exc:
+        database = f"unreachable ({exc.__class__.__name__})"
+
+    vector_store = "connected"
+    try:
+        get_memory_instance().vector_store.col_info()
+    except Exception as exc:
+        vector_store = f"unreachable ({exc.__class__.__name__})"
+
+    status = "ok" if database == "connected" and vector_store == "connected" else "degraded"
+    return {"status": status, "database": database, "vector_store": vector_store}
 
 
 @app.get("/configure", summary="Get current Mem0 configuration")
